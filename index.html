@@ -21,8 +21,12 @@ body{margin:0;height:100vh;display:flex;font-family:Arial,sans-serif;background:
 button{margin:5px;padding:10px 20px;font-size:1.1em;border:none;border-radius:6px;background:#444;color:#fff;cursor:pointer;z-index:1;position:relative;}
 button:hover{background:#666;}
 input[type=number],input[type=text],input[type=file]{padding:6px 8px;font-size:1.1em;border-radius:6px;border:none;margin-bottom:10px;width:100px;text-align:center;z-index:1;position:relative;}
-#chatMessages{width:100%;max-width:500px;height:300px;background:#222;border-radius:8px;overflow-y:scroll;padding:10px;margin-bottom:10px;}
-.chatMsg{margin:5px 0;padding:6px 10px;border-radius:6px;background:#333;word-break:break-word;}
+#chatMessages{width:100%;max-width:500px;height:300px;background:#222;border-radius:8px;overflow-y:scroll;padding:10px;margin-bottom:10px;scroll-behavior:smooth;}
+.chatMsg{margin:5px 0;padding:10px;border-radius:10px;background:#333;word-break:break-word;display:flex;align-items:flex-end;transition:background 0.2s;}
+.chatMsg:hover{background:#444;}
+.chatAvatar{width:30px;height:30px;border-radius:50%;margin-right:10px;background:#888;display:flex;align-items:center;justify-content:center;font-weight:bold;}
+.chatContent{flex:1;}
+.chatTimestamp{font-size:0.7em;color:#aaa;margin-left:10px;align-self:flex-end;}
 #chatInput{width:300px;max-width:100%;margin-right:5px;}
 #surpriseImage {
   position:fixed;
@@ -148,7 +152,7 @@ let jackTimer=null, jackTimeLeft=0, jackIndex=0;
 const jackStatus=document.getElementById("jackStatus"), jackTime=document.getElementById("jackTime");
 
 function startJackTimer(){
-  if(jackTimer) return; // prevent restart while running
+  if(jackTimer) return;
   jackIndex=0; runJackStage();
 }
 
@@ -175,12 +179,46 @@ function showSurprise(){
   document.getElementById(id+'ImageInput').addEventListener('change', e=>{ const file=e.target.files[0]; if(file){ const img=document.getElementById(id+'ImageDisplay'); img.src=URL.createObjectURL(file); img.style.display='block'; }});
 });
 
-// -------- FIREBASE CHAT --------
+// -------- FIREBASE CHAT (with nicknames & avatars) --------
 const firebaseConfig={apiKey:"AIzaSyD1RVLbn9DxiqM0TPb1jWcBgz8VfthPJAs",authDomain:"the-hazy-chat.firebaseapp.com",databaseURL:"https://the-hazy-chat-default-rtdb.firebaseio.com",projectId:"the-hazy-chat",storageBucket:"the-hazy-chat.firebasestorage.app",messagingSenderId:"884694664130",appId:"1:884694664130:web:4a2b8ae8fd69766da90c5b"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database().ref('messages');
-function sendMessage(){ const msgInput=document.getElementById('chatInput'); const text=msgInput.value.trim(); if(!text) return; db.push({text:text,time:Date.now()}); msgInput.value=''; }
-db.on('child_added',snap=>{ const val=snap.val(); const div=document.createElement('div'); div.className='chatMsg'; div.textContent=val.text; const chatBox=document.getElementById('chatMessages'); chatBox.appendChild(div); chatBox.scrollTop=chatBox.scrollHeight; });
+
+const userName = prompt("Enter your nickname:") || "Anon";
+
+function sendMessage(){
+  const msgInput=document.getElementById('chatInput'); 
+  const text=msgInput.value.trim(); 
+  if(!text) return; 
+  db.push({text:text,time:Date.now(),user:userName}); 
+  msgInput.value='';
+}
+
+db.on('child_added',snap=>{
+  const val=snap.val(); 
+  const div=document.createElement('div'); 
+  div.className='chatMsg'; 
+
+  const avatar=document.createElement('div');
+  avatar.className='chatAvatar';
+  avatar.textContent=val.user.charAt(0).toUpperCase();
+
+  const content=document.createElement('div');
+  content.className='chatContent';
+  content.textContent=val.text;
+
+  const timestamp=document.createElement('div');
+  timestamp.className='chatTimestamp';
+  timestamp.textContent=new Date(val.time).toLocaleTimeString();
+
+  div.appendChild(avatar);
+  div.appendChild(content);
+  div.appendChild(timestamp);
+
+  const chatBox=document.getElementById('chatMessages'); 
+  chatBox.appendChild(div); 
+  chatBox.scrollTop=chatBox.scrollHeight;
+});
 
 // -------- MATRIX EFFECT --------
 function startMatrix(){
