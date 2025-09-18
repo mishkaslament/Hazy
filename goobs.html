@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Hazy Cave</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    body {
+      margin:0;
+      height:100vh;
+      display:flex;
+      font-family: Arial, sans-serif;
+      background:#111;
+      color:#fff;
+    }
+
+    /* SIDEBAR */
+    #sidebar {
+      width:200px;
+      background:#1a1a1a;
+      display:flex;
+      flex-direction:column;
+      padding:10px;
+      box-shadow:2px 0 6px rgba(0,0,0,0.5);
+    }
+    @keyframes rgbCycle {
+      0% { color:red; text-shadow:0 0 8px red,0 0 20px red; }
+      16% { color:orange; text-shadow:0 0 8px orange,0 0 20px orange; }
+      33% { color:yellow; text-shadow:0 0 8px yellow,0 0 20px yellow; }
+      50% { color:green; text-shadow:0 0 8px green,0 0 20px green; }
+      66% { color:blue; text-shadow:0 0 8px blue,0 0 20px blue; }
+      83% { color:indigo; text-shadow:0 0 8px indigo,0 0 20px indigo; }
+      100% { color:violet; text-shadow:0 0 8px violet,0 0 20px violet; }
+    }
+    #sidebar h2 {
+      margin:10px 0;
+      font-size:1.6em;
+      text-align:center;
+      font-family:'Playfair Display', serif;
+      animation:rgbCycle 3s linear infinite;
+    }
+    .bar-option {
+      padding:12px 10px;
+      margin:5px 0;
+      background:#222;
+      border-radius:6px;
+      cursor:pointer;
+      transition: background 0.2s, transform 0.1s;
+      text-align:center;
+    }
+    .bar-option:hover {
+      background:#444;
+      transform:scale(1.02);
+    }
+    .bar-option.active {
+      background:#ffd166;
+      color:#111;
+    }
+
+    /* MAIN AREA */
+    #main {
+      flex:1;
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+    }
+    #status { font-size:3em; margin-bottom:10px; font-family:'Playfair Display', serif; }
+    #time { font-size:2em; margin-bottom:20px; font-family:'Playfair Display', serif; }
+    button { margin:5px; padding:10px 20px; font-size:1.1em; border:none; border-radius:6px; background:#444; color:#fff; cursor:pointer; }
+    button:hover { background:#666; }
+    input[type="number"], input[type="text"], input[type="file"] {
+      padding:6px 8px;
+      font-size:1.1em;
+      border-radius:6px;
+      border:none;
+      margin-bottom:10px;
+      width:100px;
+      text-align:center;
+    }
+
+    /* CHAT */
+    #chatMessages {
+      width:100%;
+      max-width:500px;
+      height:300px;
+      background:#222;
+      border-radius:8px;
+      overflow-y:scroll;
+      padding:10px;
+      margin-bottom:10px;
+    }
+    .chatMsg { margin:5px 0; padding:6px 10px; border-radius:6px; background:#333; word-break:break-word; }
+    #chatInput { width:300px; max-width:100%; margin-right:5px; }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h2>The Hazy Cave</h2>
+  <div class="bar-option active" onclick="selectTab('egg', this)">Egg Blinker</div>
+  <div class="bar-option" onclick="selectTab('custom', this)">Custom Timer</div>
+  <div class="bar-option" onclick="selectTab('chat', this)">Chat</div>
+</div>
+
+<div id="main">
+  <!-- Egg Blinker -->
+  <section id="egg">
+    <div>
+      <input type="file" id="eggImageInput" accept="image/*">
+      <img id="eggImageDisplay" src="" style="max-width:200px; max-height:200px; margin:10px 0; display:none;">
+    </div>
+    <div id="status">Ready</div>
+    <div id="time">0</div>
+    <div>
+      <button onclick="startEggTimer()">Start</button>
+      <button onclick="stopEggTimer()">Stop</button>
+    </div>
+  </section>
+
+  <!-- Custom Timer -->
+  <section id="custom" style="display:none;">
+    <div>
+      <input type="file" id="customImageInput" accept="image/*">
+      <img id="customImageDisplay" src="" style="max-width:200px; max-height:200px; margin:10px 0; display:none;">
+    </div>
+    <input id="customInput" type="number" placeholder="Seconds" min="1">
+    <div id="customStatus">Ready</div>
+    <div id="customTime">0</div>
+    <div>
+      <button onclick="startCustomTimer()">Start</button>
+      <button onclick="stopCustomTimer()">Stop</button>
+    </div>
+  </section>
+
+  <!-- Chat -->
+  <section id="chat" style="display:none; width:100%; max-width:500px;">
+    <div id="chatMessages"></div>
+    <input id="chatInput" type="text" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+  </section>
+</div>
+
+<script>
+  // TAB SELECTION
+  function selectTab(tabId, element){
+    document.querySelectorAll('.bar-option').forEach(b=>b.classList.remove('active'));
+    element.classList.add('active');
+    document.getElementById('egg').style.display='none';
+    document.getElementById('custom').style.display='none';
+    document.getElementById('chat').style.display='none';
+    document.getElementById(tabId).style.display='block';
+    stopEggTimer();
+    stopCustomTimer();
+  }
+
+  // EGG BLINKER
+  const eggStages=[{label:"Smoke",duration:5},{label:"Hold",duration:4},{label:"Smoke",duration:4},{label:"Hold",duration:4},{label:"Smoke",duration:4},{label:"Hold",duration:4}];
+  let eggIndex=0, eggTimeLeft=0, eggTimer=null;
+  const eggStatus=document.getElementById("status"), eggTime=document.getElementById("time");
+  function startEggTimer(){ stopEggTimer(); eggIndex=0; runEggStage(); }
+  function stopEggTimer(){ clearInterval(eggTimer); eggTimer=null; eggStatus.textContent="Stopped"; eggTime.textContent="0"; }
+  function runEggStage(){ if(eggIndex>=eggStages.length){ eggStatus.textContent="Done!"; eggTime.textContent="0"; return; }
+    const stage=eggStages[eggIndex]; eggTimeLeft=stage.duration; eggStatus.textContent=stage.label; eggTime.textContent=eggTimeLeft;
+    eggTimer=setInterval(()=>{ eggTimeLeft--; eggTime.textContent=eggTimeLeft; if(eggTimeLeft<=0){ clearInterval(eggTimer); eggIndex++; runEggStage(); } },1000);
+  }
+
+  // CUSTOM TIMER
+  let customTimer=null, customTimeLeft=0;
+  const customStatus=document.getElementById("customStatus"), customTime=document.getElementById("customTime");
+  function startCustomTimer(){ stopCustomTimer(); const val=parseInt(document.getElementById("customInput").value);
+    if(isNaN(val)||val<=0){ alert("Enter a valid number"); return; } customTimeLeft=val; customStatus.textContent="Running"; customTime.textContent=customTimeLeft;
+    customTimer=setInterval(()=>{ customTimeLeft--; customTime.textContent=customTimeLeft; if(customTimeLeft<=0){ clearInterval(customTimer); customStatus.textContent="Done!"; customTime.textContent="0"; } },1000);
+  }
+  function stopCustomTimer(){ clearInterval(customTimer); customTimer=null; customStatus.textContent="Stopped"; customTime.textContent="0"; }
+
+  // IMAGE DISPLAY
+  document.getElementById('eggImageInput').addEventListener('change', e=>{ const file=e.target.files[0]; if(file){ const url=URL.createObjectURL(file); const img=document.getElementById('eggImageDisplay'); img.src=url; img.style.display='block'; }});
+  document.getElementById('customImageInput').addEventListener('change', e=>{ const file=e.target.files[0]; if(file){ const url=URL.createObjectURL(file); const img=document.getElementById('customImageDisplay'); img.src=url; img.style.display='block'; }});
+
+  // FIREBASE CHAT (replace config with your own)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db=firebase.database().ref('messages');
+
+  function sendMessage(){
+    const msgInput=document.getElementById('chatInput');
+    const text=msgInput.value.trim();
+    if(text==='') return;
+    db.push({text: text, time: Date.now()});
+    msgInput.value='';
+  }
+
+  db.on('child_added', snap=>{
+    const val=snap.val();
+    const div=document.createElement('div');
+    div.className='chatMsg';
+    div.textContent=val.text;
+    document.getElementById('chatMessages').appendChild(div);
+    document.getElementById('chatMessages').scrollTop=document.getElementById('chatMessages').scrollHeight;
+  });
+</script>
+
+</body>
+</html>
