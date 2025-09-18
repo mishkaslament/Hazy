@@ -82,8 +82,8 @@
       display:none;
     }
 
-    #status { font-size:3em; margin-bottom:10px; font-family:'Playfair Display', serif; z-index:1; position:relative;}
-    #time { font-size:2em; margin-bottom:20px; font-family:'Playfair Display', serif; z-index:1; position:relative;}
+    #status, #jackStatus, #customStatus { font-size:3em; margin-bottom:10px; font-family:'Playfair Display', serif; z-index:1; position:relative;}
+    #time, #jackTime, #customTime { font-size:2em; margin-bottom:20px; font-family:'Playfair Display', serif; z-index:1; position:relative;}
     button { margin:5px; padding:10px 20px; font-size:1.1em; border:none; border-radius:6px; background:#444; color:#fff; cursor:pointer; z-index:1; position:relative; }
     button:hover { background:#666; }
     input[type="number"], input[type="text"], input[type="file"] {
@@ -111,7 +111,6 @@
     }
     .chatMsg { margin:5px 0; padding:6px 10px; border-radius:6px; background:#333; word-break:break-word; }
     #chatInput { width:300px; max-width:100%; margin-right:5px; }
-
   </style>
 </head>
 <body>
@@ -120,6 +119,7 @@
   <h2>The Hazy Cave</h2>
   <div class="bar-option active" onclick="selectTab('egg', this)">Egg Blinker</div>
   <div class="bar-option" onclick="selectTab('custom', this)">Custom Timer</div>
+  <div class="bar-option" onclick="selectTab('jack', this)">Jack Timer</div>
   <div class="bar-option" onclick="selectTab('chat', this)">Chat</div>
 </div>
 
@@ -155,6 +155,16 @@
     </div>
   </section>
 
+  <!-- Jack Timer -->
+  <section id="jack" style="display:none;">
+    <div id="jackStatus">Ready</div>
+    <div id="jackTime">0</div>
+    <div>
+      <button onclick="startJackTimer()">Start</button>
+      <button onclick="stopJackTimer()">Stop</button>
+    </div>
+  </section>
+
   <!-- Chat -->
   <section id="chat" style="display:none; width:100%; max-width:500px;">
     <div id="chatMessages"></div>
@@ -170,10 +180,12 @@
     element.classList.add('active');
     document.getElementById('egg').style.display='none';
     document.getElementById('custom').style.display='none';
+    document.getElementById('jack').style.display='none';
     document.getElementById('chat').style.display='none';
     document.getElementById(tabId).style.display='block';
     stopEggTimer();
     stopCustomTimer();
+    stopJackTimer();
 
     // MATRIX START ONLY ON EGG BLINKER
     const canvas = document.getElementById('matrixCanvas');
@@ -200,6 +212,14 @@
     customTimer=setInterval(()=>{ customTimeLeft--; customTime.textContent=customTimeLeft; if(customTimeLeft<=0){ clearInterval(customTimer); customStatus.textContent="Done!"; customTime.textContent="0"; } },1000);
   }
   function stopCustomTimer(){ clearInterval(customTimer); customTimer=null; customStatus.textContent="Stopped"; customTime.textContent="0"; }
+
+  // JACK TIMER
+  let jackTimer=null, jackTimeLeft=0;
+  const jackStatus=document.getElementById("jackStatus"), jackTime=document.getElementById("jackTime");
+  function startJackTimer(){ stopJackTimer(); jackTimeLeft=10; jackStatus.textContent="Running"; jackTime.textContent=jackTimeLeft;
+    jackTimer=setInterval(()=>{ jackTimeLeft--; jackTime.textContent=jackTimeLeft; if(jackTimeLeft<=0){ clearInterval(jackTimer); jackStatus.textContent="Done!"; jackTime.textContent="0"; } },1000);
+  }
+  function stopJackTimer(){ clearInterval(jackTimer); jackTimer=null; jackStatus.textContent="Stopped"; jackTime.textContent="0"; }
 
   // IMAGE DISPLAY
   document.getElementById('eggImageInput').addEventListener('change', e=>{ const file=e.target.files[0]; if(file){ const url=URL.createObjectURL(file); const img=document.getElementById('eggImageDisplay'); img.src=url; img.style.display='block'; }});
@@ -262,7 +282,6 @@
   }
 
   function stopMatrix(){ clearInterval(matrixInterval); matrixInterval=null; }
-
 </script>
 </body>
 </html>
