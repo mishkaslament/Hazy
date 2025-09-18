@@ -179,18 +179,34 @@ function showSurprise(){
   document.getElementById(id+'ImageInput').addEventListener('change', e=>{ const file=e.target.files[0]; if(file){ const img=document.getElementById(id+'ImageDisplay'); img.src=URL.createObjectURL(file); img.style.display='block'; }});
 });
 
-// -------- FIREBASE CHAT (with nicknames & avatars) --------
+// -------- FIREBASE CHAT (with local commands) --------
 const firebaseConfig={apiKey:"AIzaSyD1RVLbn9DxiqM0TPb1jWcBgz8VfthPJAs",authDomain:"the-hazy-chat.firebaseapp.com",databaseURL:"https://the-hazy-chat-default-rtdb.firebaseio.com",projectId:"the-hazy-chat",storageBucket:"the-hazy-chat.firebasestorage.app",messagingSenderId:"884694664130",appId:"1:884694664130:web:4a2b8ae8fd69766da90c5b"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database().ref('messages');
 
-const userName = prompt("Enter your nickname:") || "Anon";
+const userNameObj = { name: prompt("Enter your nickname:") || "Anon" };
 
 function sendMessage(){
   const msgInput=document.getElementById('chatInput'); 
-  const text=msgInput.value.trim(); 
-  if(!text) return; 
-  db.push({text:text,time:Date.now(),user:userName}); 
+  let text=msgInput.value.trim(); 
+  if(!text) return;
+
+  // ---- LOCAL COMMANDS ----
+  if(text === '/clear'){
+    document.getElementById('chatMessages').innerHTML = '';
+    msgInput.value='';
+    return;
+  }
+
+  if(text.startsWith('/nick ')){
+    const newName = text.substring(6).trim();
+    if(newName) userNameObj.name = newName;
+    msgInput.value='';
+    return;
+  }
+
+  // ---- NORMAL MESSAGE ----
+  db.push({text:text,time:Date.now(),user:userNameObj.name}); 
   msgInput.value='';
 }
 
@@ -204,8 +220,8 @@ db.on('child_added',snap=>{
   avatar.textContent=val.user.charAt(0).toUpperCase();
 
   const content=document.createElement('div');
-content.className='chatContent';
-content.innerHTML = `<strong>${val.user}:</strong> ${val.text}`;
+  content.className='chatContent';
+  content.innerHTML = `<strong>${val.user}:</strong> ${val.text}`;
 
   const timestamp=document.createElement('div');
   timestamp.className='chatTimestamp';
@@ -239,4 +255,3 @@ function stopMatrix(){ clearInterval(matrixInterval); matrixInterval=null; }
 </script>
 </body>
 </html>
-
