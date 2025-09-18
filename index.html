@@ -24,6 +24,18 @@ input[type=number],input[type=text],input[type=file]{padding:6px 8px;font-size:1
 #chatMessages{width:100%;max-width:500px;height:300px;background:#222;border-radius:8px;overflow-y:scroll;padding:10px;margin-bottom:10px;}
 .chatMsg{margin:5px 0;padding:6px 10px;border-radius:6px;background:#333;word-break:break-word;}
 #chatInput{width:300px;max-width:100%;margin-right:5px;}
+#surpriseImage {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  max-width:90%;
+  max-height:90%;
+  pointer-events:none;
+  opacity:1;
+  transition: transform 3s ease-out, opacity 2s ease-in 3s;
+  z-index:999;
+}
 </style>
 </head>
 <body>
@@ -88,6 +100,9 @@ input[type=number],input[type=text],input[type=file]{padding:6px 8px;font-size:1
   </section>
 </div>
 
+<img id="surpriseImage" src="https://i.imgur.com/H8QQ2cb.png">
+<audio id="fartSound" src="https://www.soundjay.com/human/fart-01.mp3" preload="auto"></audio>
+
 <script>
 let matrixInterval=null;
 
@@ -111,10 +126,7 @@ function startEggTimer(){ clearInterval(eggTimer); eggIndex=0; runEggStage(); }
 function runEggStage(){
   if(eggIndex>=eggStages.length){ eggStatus.textContent="Done!"; eggTime.textContent="0"; return; }
   const stage=eggStages[eggIndex]; eggTimeLeft=stage.duration; eggStatus.textContent=stage.label; eggTime.textContent=eggTimeLeft;
-  eggTimer=setInterval(()=>{
-    eggTimeLeft--; eggTime.textContent=eggTimeLeft;
-    if(eggTimeLeft<=0){ clearInterval(eggTimer); eggIndex++; runEggStage(); }
-  },1000);
+  eggTimer=setInterval(()=>{ eggTimeLeft--; eggTime.textContent=eggTimeLeft; if(eggTimeLeft<=0){ clearInterval(eggTimer); eggIndex++; runEggStage(); } },1000);
 }
 function stopEggTimer(){ clearInterval(eggTimer); eggTimer=null; eggStatus.textContent="Stopped"; setTimeout(()=>{ eggStatus.textContent="Ready"; eggTime.textContent="0"; eggIndex=0; },1000); }
 
@@ -126,10 +138,7 @@ function startCustomTimer(){
   const val=parseInt(document.getElementById("customInput").value);
   if(isNaN(val)||val<=0){ alert("Enter a valid number"); return; }
   customTimeLeft=val; customStatus.textContent="Running"; customTime.textContent=customTimeLeft;
-  customTimer=setInterval(()=>{
-    customTimeLeft--; customTime.textContent=customTimeLeft;
-    if(customTimeLeft<=0){ clearInterval(customTimer); customStatus.textContent="Done!"; customTime.textContent="0"; }
-  },1000);
+  customTimer=setInterval(()=>{ customTimeLeft--; customTime.textContent=customTimeLeft; if(customTimeLeft<=0){ clearInterval(customTimer); customStatus.textContent="Done!"; customTime.textContent="0"; } },1000);
 }
 function stopCustomTimer(){ clearInterval(customTimer); customTimer=null; customStatus.textContent="Stopped"; setTimeout(()=>{ customStatus.textContent="Ready"; customTime.textContent="0"; },1000); }
 
@@ -144,22 +153,26 @@ function startJackTimer(){
 }
 
 function runJackStage(){
-  if(jackIndex>=jackStages.length){ jackStatus.textContent="Done!"; jackTime.textContent="0"; jackTimer=null; return; }
+  if(jackIndex>=jackStages.length){ jackStatus.textContent="Done!"; jackTime.textContent="0"; jackTimer=null; showSurprise(); return; }
   const stage=jackStages[jackIndex]; jackTimeLeft=stage.duration;
   jackStatus.textContent=stage.label; jackTime.textContent=jackTimeLeft;
-  jackTimer=setInterval(()=>{
-    jackTimeLeft--; jackTime.textContent=jackTimeLeft;
-    if(jackTimeLeft<=0){ clearInterval(jackTimer); jackTimer=null; jackIndex++; setTimeout(runJackStage, 500); } // small delay between stages
-  },1000);
+  jackTimer=setInterval(()=>{ jackTimeLeft--; jackTime.textContent=jackTimeLeft; if(jackTimeLeft<=0){ clearInterval(jackTimer); jackTimer=null; jackIndex++; setTimeout(runJackStage, 500); } },1000);
 }
 
 function stopJackTimer(){ clearInterval(jackTimer); jackTimer=null; jackStatus.textContent="Stopped"; setTimeout(()=>{ jackStatus.textContent="Ready"; jackTime.textContent="0"; jackIndex=0; },1000); }
 
+// -------- SURPRISE IMAGE + SOUND --------
+function showSurprise(){
+  const img=document.getElementById("surpriseImage");
+  img.style.transform="translate(-50%,-50%) scale(0.01)";
+  img.style.opacity="1";
+  setTimeout(()=>{ img.style.transform="translate(-50%,-50%) scale(1)"; },50);
+  setTimeout(()=>{ img.style.opacity="0"; document.getElementById("fartSound").play(); },3050);
+}
+
 // -------- IMAGE PREVIEW --------
 ['egg','custom'].forEach(id=>{
-  document.getElementById(id+'ImageInput').addEventListener('change', e=>{
-    const file=e.target.files[0]; if(file){ const img=document.getElementById(id+'ImageDisplay'); img.src=URL.createObjectURL(file); img.style.display='block'; }
-  });
+  document.getElementById(id+'ImageInput').addEventListener('change', e=>{ const file=e.target.files[0]; if(file){ const img=document.getElementById(id+'ImageDisplay'); img.src=URL.createObjectURL(file); img.style.display='block'; }});
 });
 
 // -------- FIREBASE CHAT --------
