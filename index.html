@@ -204,8 +204,8 @@ db.on('child_added',snap=>{
   avatar.textContent=val.user.charAt(0).toUpperCase();
 
   const content=document.createElement('div');
-  content.className='chatContent';
-  content.textContent=val.text;
+content.className='chatContent';
+content.innerHTML = `<strong>${val.user}:</strong> ${val.text}`;
 
   const timestamp=document.createElement('div');
   timestamp.className='chatTimestamp';
@@ -239,3 +239,4 @@ function stopMatrix(){ clearInterval(matrixInterval); matrixInterval=null; }
 </script>
 </body>
 </html>
+
