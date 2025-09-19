@@ -147,7 +147,7 @@ function startCustomTimer(){
 function stopCustomTimer(){ clearInterval(customTimer); customTimer=null; customStatus.textContent="Stopped"; setTimeout(()=>{ customStatus.textContent="Ready"; customTime.textContent="0"; },1000); }
 
 // -------- JACK TIMER --------
-const jackStages=[{label:"Heat",duration:45},{label:"Cool",duration:40}];
+const jackStages=[{label:"Heat",duration:45},{label:"Cool",duration:33}];
 let jackTimer=null, jackTimeLeft=0, jackIndex=0;
 const jackStatus=document.getElementById("jackStatus"), jackTime=document.getElementById("jackTime");
 
@@ -255,3 +255,4 @@ function stopMatrix(){ clearInterval(matrixInterval); matrixInterval=null; }
 </script>
 </body>
 </html>
+
