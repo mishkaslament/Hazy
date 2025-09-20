@@ -7,58 +7,78 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <style>
-body{margin:0;height:100vh;display:flex;font-family:Arial,sans-serif;background:#111;color:#fff;}
-#sidebar{width:200px;background:#1a1a1a;display:flex;flex-direction:column;padding:10px;box-shadow:2px 0 6px rgba(0,0,0,0.5);}
-@keyframes rgbCycle{0%{color:red;text-shadow:0 0 8px red,0 0 20px red;}16%{color:orange;text-shadow:0 0 8px orange,0 0 20px orange;}33%{color:yellow;text-shadow:0 0 8px yellow,0 0 20px yellow;}50%{color:green;text-shadow:0 0 8px green,0 0 20px green;}66%{color:blue;text-shadow:0 0 8px blue,0 0 20px blue;}83%{color:indigo;text-shadow:0 0 8px indigo,0 0 20px indigo;}100%{color:violet;text-shadow:0 0 8px violet,0 0 20px violet;}}
-#sidebar h2{margin:10px 0;font-size:1.6em;text-align:center;font-family:'Playfair Display',serif;animation:rgbCycle 3s linear infinite;}
-.bar-option{padding:12px 10px;margin:5px 0;background:#222;border-radius:6px;cursor:pointer;transition:background 0.2s,transform 0.1s;text-align:center;}
-.bar-option:hover{background:#444;transform:scale(1.02);}
-.bar-option.active{background:#ffd166;color:#111;}
-#main{flex:1;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;position:relative;}
-#matrixCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;display:none;}
-#status,#jackStatus,#customStatus{font-size:3em;margin-bottom:10px;font-family:'Playfair Display',serif;z-index:1;position:relative;}
-#time,#jackTime,#customTime{font-size:2em;margin-bottom:20px;font-family:'Playfair Display',serif;z-index:1;position:relative;}
-button{margin:5px;padding:10px 20px;font-size:1.1em;border:none;border-radius:6px;background:#444;color:#fff;cursor:pointer;z-index:1;position:relative;}
-button:hover{background:#666;}
-input[type=number],input[type=text],input[type=file]{padding:6px 8px;font-size:1.1em;border-radius:6px;border:none;margin-bottom:10px;width:100px;text-align:center;z-index:1;position:relative;}
-#chatMessages{width:100%;max-width:500px;height:300px;background:#222;border-radius:8px;overflow-y:scroll;padding:10px;margin-bottom:10px;scroll-behavior:smooth;}
-.chatMsg{margin:5px 0;padding:10px;border-radius:10px;background:#333;word-break:break-word;display:flex;align-items:flex-end;transition:background 0.2s;}
-.chatMsg:hover{background:#444;}
-.chatAvatar{width:30px;height:30px;border-radius:50%;margin-right:10px;background:#888;display:flex;align-items:center;justify-content:center;font-weight:bold;}
-.chatContent{flex:1;}
-.chatTimestamp{font-size:0.7em;color:#aaa;margin-left:10px;align-self:flex-end;}
-#chatInput{width:300px;max-width:100%;margin-right:5px;}
-#surpriseImage {
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%) scale(0);
-  max-width:90%;
-  max-height:90%;
-  pointer-events:none;
-  opacity:1;
-  transition: transform 3s ease-out, opacity 2s ease-in 3s;
-  z-index:999;
-}
+  /* Base layout */
+  body{margin:0;height:100vh;display:flex;font-family:Arial,sans-serif;background:#111;color:#fff;}
+  #sidebar{width:200px;background:#1a1a1a;display:flex;flex-direction:column;padding:10px;box-shadow:2px 0 6px rgba(0,0,0,0.5);}
+  @keyframes rgbCycle{0%{color:red;text-shadow:0 0 8px red,0 0 20px red;}16%{color:orange;text-shadow:0 0 8px orange,0 0 20px orange;}33%{color:yellow;text-shadow:0 0 8px yellow,0 0 20px yellow;}50%{color:green;text-shadow:0 0 8px green,0 0 20px green;}66%{color:blue;text-shadow:0 0 8px blue,0 0 20px blue;}83%{color:indigo;text-shadow:0 0 8px indigo,0 0 20px indigo;}100%{color:violet;text-shadow:0 0 8px violet,0 0 20px violet;}}
+  #sidebar h2{margin:10px 0;font-size:1.6em;text-align:center;font-family:'Playfair Display',serif;animation:rgbCycle 3s linear infinite;}
+  .bar-option{padding:12px 10px;margin:5px 0;background:#222;border-radius:6px;cursor:pointer;transition:background 0.2s,transform 0.1s;text-align:center;}
+  .bar-option:hover{background:#444;transform:scale(1.02);}
+  .bar-option.active{background:#ffd166;color:#111;}
+  #main{flex:1;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;position:relative;overflow:hidden;}
+
+  /* Matrix canvas */
+  #matrixCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;display:none;}
+
+  /* Timer text */
+  #status,#jackStatus,#customStatus{font-size:3em;margin-bottom:10px;font-family:'Playfair Display',serif;z-index:1;position:relative;}
+  #time,#jackTime,#customTime{font-size:2em;margin-bottom:20px;font-family:'Playfair Display',serif;z-index:1;position:relative;}
+  button{margin:5px;padding:10px 20px;font-size:1.1em;border:none;border-radius:6px;background:#444;color:#fff;cursor:pointer;z-index:1;position:relative;}
+  button:hover{background:#666;}
+  input[type=number],input[type=text],input[type=file]{padding:6px 8px;font-size:1.1em;border-radius:6px;border:none;margin-bottom:10px;width:100px;text-align:center;z-index:1;position:relative;}
+
+  /* Chat */
+  #chatMessages{width:100%;max-width:500px;height:300px;background:#222;border-radius:8px;overflow-y:scroll;padding:10px;margin-bottom:10px;scroll-behavior:smooth;}
+  .chatMsg{margin:5px 0;padding:10px;border-radius:10px;background:#333;word-break:break-word;display:flex;align-items:flex-end;transition:background 0.2s;}
+  .chatMsg:hover{background:#444;}
+  .chatAvatar{width:30px;height:30px;border-radius:50%;margin-right:10px;background:#888;display:flex;align-items:center;justify-content:center;font-weight:bold;}
+  .chatContent{flex:1;white-space:pre-wrap;}
+  .chatTimestamp{font-size:0.7em;color:#aaa;margin-left:10px;align-self:flex-end;}
+  #chatInput{width:300px;max-width:100%;margin-right:5px;}
+
+  /* Surprise image */
+  #surpriseImage { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); max-width:90%; max-height:90%; pointer-events:none; opacity:1; transition: transform 3s ease-out, opacity 2s ease-in 3s; z-index:999; }
+
+  /* Retro (2000s) mode styles */
+  body.retro { background: repeating-linear-gradient(45deg,#020,#020 6px,#060 6px,#060 12px); color: #0f0; font-family: "Comic Sans MS","ComicNeue",cursive,Arial; }
+  body.retro #sidebar { background: #050505; box-shadow: 6px 0 0 rgba(255,255,255,0.03) inset; }
+  body.retro .bar-option { background:#001100; border:2px solid #0f0; color:#0f0; border-radius:0; }
+  body.retro .bar-option.active { background:#fff000; color:#000; }
+  #retroBanner { width:100%; text-align:center; z-index:2; margin-bottom:10px; display:none; font-weight:bold; }
+  body.retro #retroBanner { display:block; color:#ff0; text-shadow: 1px 1px 0 #000; }
+  /* visitor counter style */
+  #visitorCounter { text-align:center; padding:6px 0; font-size:0.9em; color:#ccc; }
+  body.retro #visitorCounter { color:#0f0; }
+  /* small 2000s cursor effect (cursor: crosshair) */
+  body.retro { cursor:crosshair; }
+
+  /* small responsive */
+  @media (max-width:800px){ #sidebar{width:140px;} input[type=number],input[type=file]{width:80px;} }
 </style>
 </head>
 <body>
 
 <div id="sidebar">
   <h2>The Hazy Cave</h2>
+  <div id="visitorCounter">Visitors: 0</div>
   <div class="bar-option active" onclick="selectTab('mainPage', this)">Home</div>
   <div class="bar-option" onclick="selectTab('egg', this)">Egg Blinker</div>
   <div class="bar-option" onclick="selectTab('custom', this)">Custom Timer</div>
   <div class="bar-option" onclick="selectTab('jack', this)">Jack Timer</div>
   <div class="bar-option" onclick="selectTab('chat', this)">Chat</div>
+  <div class="bar-option" onclick="toggleRetro()">2000s Mode</div>
+  <div style="margin-top:auto;font-size:0.85em;color:#999;text-align:center;padding:6px;">The Hazy Cave • 2025</div>
 </div>
 
 <div id="main">
   <canvas id="matrixCanvas"></canvas>
 
+  <div id="retroBanner"><marquee behavior="scroll" scrollamount="6">WELCOME TO THE HAZY CAVE — UNDER CONSTRUCTION — ADD A GUESTBOOK — VISIT OFTEN!</marquee></div>
+
   <section id="mainPage">
     <h2>Welcome to The Hazy Cave</h2>
     <p>Select a timer or chat from the sidebar to begin.</p>
+    <p style="font-size:0.9em;color:#bbb;">Tips: toggle "2000s Mode" to get retro styling. Use <code>/clear</code> in chat to clear your view, <code>/nick NAME</code> to change your nickname locally.</p>
   </section>
 
   <section id="egg" style="display:none;">
@@ -69,7 +89,7 @@ input[type=number],input[type=text],input[type=file]{padding:6px 8px;font-size:1
     <div id="status">Ready</div>
     <div id="time">0</div>
     <div>
-      <button onclick="startEggTimer()">Start</button>
+      <button id="eggStartBtn" onclick="startEggTimer()">Start</button>
       <button onclick="stopEggTimer()">Stop</button>
     </div>
   </section>
@@ -89,6 +109,10 @@ input[type=number],input[type=text],input[type=file]{padding:6px 8px;font-size:1
   </section>
 
   <section id="jack" style="display:none;">
+    <div>
+      <label style="display:block;margin-bottom:6px;">Heat <input id="jackHeatInput" type="number" value="45" min="1" style="width:70px;"></label>
+      <label style="display:block;margin-bottom:6px;">Cool <input id="jackCoolInput" type="number" value="40" min="1" style="width:70px;"></label>
+    </div>
     <div id="jackStatus">Ready</div>
     <div id="jackTime">0</div>
     <div>
@@ -99,160 +123,422 @@ input[type=number],input[type=text],input[type=file]{padding:6px 8px;font-size:1
 
   <section id="chat" style="display:none; width:100%; max-width:500px;">
     <div id="chatMessages"></div>
-    <input id="chatInput" type="text" placeholder="Type a message...">
-    <button onclick="sendMessage()">Send</button>
+    <div style="display:flex;align-items:center;">
+      <input id="chatInput" type="text" placeholder="Type a message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
   </section>
 </div>
 
-<img id="surpriseImage" src="https://i.imgur.com/H8QQ2cb.png">
+<img id="surpriseImage" src="https://i.imgur.com/H8QQ2cb.png" alt="surprise">
 <audio id="fartSound" src="https://www.soundjay.com/human/fart-01.mp3" preload="auto"></audio>
 
 <script>
-let matrixInterval=null;
+/* -------------------------
+   Initialization / utilities
+   ------------------------- */
+let matrixInterval = null;
+let audioCtx = null, convolver = null, masterGain = null;
 
+function ensureAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.connect(audioCtx.destination);
+    // build a small impulse for reverb
+    convolver = audioCtx.createConvolver();
+    convolver.buffer = createReverbBuffer(audioCtx, 2.0, 2.0); // 2s decay, 2s length
+    convolver.connect(masterGain);
+  }
+}
+function createReverbBuffer(ctx, duration = 2.0, decay = 2.0) {
+  const rate = ctx.sampleRate;
+  const length = rate * duration;
+  const impulse = ctx.createBuffer(2, length, rate);
+  for (let i = 0; i < 2; i++) {
+    const channel = impulse.getChannelData(i);
+    for (let j = 0; j < length; j++) {
+      channel[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / length, decay);
+    }
+  }
+  return impulse;
+}
+
+/* -------------------------
+   Retro Mode toggle & visitor counter
+   ------------------------- */
+function toggleRetro(){
+  const body = document.body;
+  const isRetro = body.classList.toggle('retro');
+  localStorage.setItem('hazy_retro', isRetro ? '1' : '0');
+  updateVisitorCounterStyle();
+}
+function updateVisitorCounterStyle(){
+  const counter = document.getElementById('visitorCounter');
+  const v = Number(localStorage.getItem('hazy_visitors') || 0);
+  counter.textContent = `Visitors: ${v}`;
+}
+
+/* increment visitor (local) once per page load */
+(function incrementVisitor(){
+  const key = 'hazy_visitors';
+  let v = Number(localStorage.getItem(key) || 0);
+  v++;
+  localStorage.setItem(key, String(v));
+  // show it
+  updateVisitorCounterStyle();
+})();
+
+/* persist retro preference */
+(function applyRetroPref(){
+  if (localStorage.getItem('hazy_retro') === '1') document.body.classList.add('retro');
+})();
+
+/* -------------------------
+   TAB selection
+   ------------------------- */
 function selectTab(tabId, element){
   document.querySelectorAll('.bar-option').forEach(b=>b.classList.remove('active'));
-  element.classList.add('active');
-  ['mainPage','egg','custom','jack','chat'].forEach(id=>document.getElementById(id).style.display='none');
-  document.getElementById(tabId).style.display='block';
-  stopEggTimer(); stopCustomTimer(); stopJackTimer();
-
-  const canvas=document.getElementById('matrixCanvas');
-  if(tabId==='egg'){ canvas.style.display='block'; startMatrix(); }
-  else{ canvas.style.display='none'; stopMatrix(); }
+  if(element) element.classList.add('active');
+  ['mainPage','egg','custom','jack','chat'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = (id === tabId) ? 'block' : 'none';
+  });
+  // stop timers when switching away; keep matrix only if egg and egg timer running
+  stopEggTimer();
+  stopCustomTimer();
+  stopJackTimer();
+  const canvas = document.getElementById('matrixCanvas');
+  if(tabId === 'egg') {
+    canvas.style.display = 'block';
+    // matrix will start if the timer starts; show faded canvas even if not started
+  } else {
+    canvas.style.display = 'none';
+    stopMatrix();
+  }
 }
 
-// -------- EGG TIMER --------
-const eggStages=[{label:"Smoke",duration:5},{label:"Hold",duration:4},{label:"Smoke",duration:4},{label:"Hold",duration:4},{label:"Smoke",duration:4},{label:"Hold",duration:4}];
+/* -------------------------
+   EGG TIMER
+   ------------------------- */
+const eggStages = [{label:"Smoke",duration:5},{label:"Hold",duration:4},{label:"Smoke",duration:4},{label:"Hold",duration:4},{label:"Smoke",duration:4},{label:"Hold",duration:4}];
 let eggIndex=0, eggTimeLeft=0, eggTimer=null;
 const eggStatus=document.getElementById("status"), eggTime=document.getElementById("time");
-function startEggTimer(){ clearInterval(eggTimer); eggIndex=0; runEggStage(); }
-function runEggStage(){
-  if(eggIndex>=eggStages.length){ eggStatus.textContent="Done!"; eggTime.textContent="0"; return; }
-  const stage=eggStages[eggIndex]; eggTimeLeft=stage.duration; eggStatus.textContent=stage.label; eggTime.textContent=eggTimeLeft;
-  eggTimer=setInterval(()=>{ eggTimeLeft--; eggTime.textContent=eggTimeLeft; if(eggTimeLeft<=0){ clearInterval(eggTimer); eggIndex++; runEggStage(); } },1000);
-}
-function stopEggTimer(){ clearInterval(eggTimer); eggTimer=null; eggStatus.textContent="Stopped"; setTimeout(()=>{ eggStatus.textContent="Ready"; eggTime.textContent="0"; eggIndex=0; },1000); }
 
-// -------- CUSTOM TIMER --------
+function startEggTimer(){
+  // start matrix effect as soon as egg timer is started
+  startMatrix();
+  clearInterval(eggTimer);
+  eggIndex=0;
+  runEggStage();
+}
+function runEggStage(){
+  if(eggIndex>=eggStages.length){
+    eggStatus.textContent = "Done!";
+    eggTime.textContent = "0";
+    stopMatrix(); // stop matrix when done
+    return;
+  }
+  const stage = eggStages[eggIndex];
+  eggTimeLeft = stage.duration;
+  eggStatus.textContent = stage.label;
+  eggTime.textContent = eggTimeLeft;
+  eggTimer = setInterval(()=>{
+    eggTimeLeft--;
+    eggTime.textContent = eggTimeLeft;
+    if(eggTimeLeft <= 0){
+      clearInterval(eggTimer);
+      eggIndex++;
+      // small delay between stages so UI shows transition smoothly
+      setTimeout(runEggStage, 250);
+    }
+  }, 1000);
+}
+function stopEggTimer(){
+  clearInterval(eggTimer);
+  eggTimer=null;
+  eggStatus.textContent="Stopped";
+  // keep the stopped text for 1s then reset
+  setTimeout(()=>{
+    eggStatus.textContent="Ready";
+    eggTime.textContent="0";
+    eggIndex=0;
+    stopMatrix();
+  },1000);
+}
+
+/* -------------------------
+   CUSTOM TIMER
+   ------------------------- */
 let customTimer=null, customTimeLeft=0;
 const customStatus=document.getElementById("customStatus"), customTime=document.getElementById("customTime");
 function startCustomTimer(){
   clearInterval(customTimer);
   const val=parseInt(document.getElementById("customInput").value);
   if(isNaN(val)||val<=0){ alert("Enter a valid number"); return; }
-  customTimeLeft=val; customStatus.textContent="Running"; customTime.textContent=customTimeLeft;
-  customTimer=setInterval(()=>{ customTimeLeft--; customTime.textContent=customTimeLeft; if(customTimeLeft<=0){ clearInterval(customTimer); customStatus.textContent="Done!"; customTime.textContent="0"; } },1000);
+  customTimeLeft=val;
+  customStatus.textContent="Running";
+  customTime.textContent=customTimeLeft;
+  customTimer=setInterval(()=>{
+    customTimeLeft--;
+    customTime.textContent=customTimeLeft;
+    if(customTimeLeft<=0){
+      clearInterval(customTimer);
+      customStatus.textContent="Done!";
+      customTime.textContent="0";
+    }
+  },1000);
 }
-function stopCustomTimer(){ clearInterval(customTimer); customTimer=null; customStatus.textContent="Stopped"; setTimeout(()=>{ customStatus.textContent="Ready"; customTime.textContent="0"; },1000); }
+function stopCustomTimer(){
+  clearInterval(customTimer);
+  customTimer=null;
+  customStatus.textContent="Stopped";
+  setTimeout(()=>{
+    customStatus.textContent="Ready";
+    customTime.textContent="0";
+  },1000);
+}
 
-// -------- JACK TIMER --------
-const jackStages=[{label:"Heat",duration:45},{label:"Cool",duration:33}];
+/* -------------------------
+   JACK TIMER (with inputs)
+   ------------------------- */
 let jackTimer=null, jackTimeLeft=0, jackIndex=0;
 const jackStatus=document.getElementById("jackStatus"), jackTime=document.getElementById("jackTime");
 
 function startJackTimer(){
-  if(jackTimer) return;
-  jackIndex=0; runJackStage();
+  // read durations from inputs so user can hand-change them
+  const heat = parseInt(document.getElementById('jackHeatInput').value) || 45;
+  const cool = parseInt(document.getElementById('jackCoolInput').value) || 40;
+  // set stages dynamically
+  window.jackStages = [{label:'Heat', duration: heat},{label:'Cool', duration: cool}];
+  if (jackTimer) return; // prevent double-start
+  jackIndex = 0;
+  runJackStage();
 }
 
 function runJackStage(){
-  if(jackIndex>=jackStages.length){ jackStatus.textContent="Done!"; jackTime.textContent="0"; jackTimer=null; showSurprise(); return; }
-  const stage=jackStages[jackIndex]; jackTimeLeft=stage.duration;
-  jackStatus.textContent=stage.label; jackTime.textContent=jackTimeLeft;
-  jackTimer=setInterval(()=>{ jackTimeLeft--; jackTime.textContent=jackTimeLeft; if(jackTimeLeft<=0){ clearInterval(jackTimer); jackTimer=null; jackIndex++; setTimeout(runJackStage, 500); } },1000);
+  const stages = window.jackStages || [{label:'Heat',duration:45},{label:'Cool',duration:40}];
+  if (jackIndex >= stages.length){
+    jackStatus.textContent = "Done!";
+    jackTime.textContent = "0";
+    jackTimer = null;
+    // show surprise sequence
+    showSurprise();
+    return;
+  }
+  const stage = stages[jackIndex];
+  jackTimeLeft = stage.duration;
+  jackStatus.textContent = stage.label;
+  jackTime.textContent = jackTimeLeft;
+  // start countdown
+  jackTimer = setInterval(()=>{
+    jackTimeLeft--;
+    jackTime.textContent = jackTimeLeft;
+    // avoid transient "Ready" showing mid-run: stop() sets Ready only after 1s
+    if (jackTimeLeft <= 0){
+      clearInterval(jackTimer);
+      jackTimer = null;
+      jackIndex++;
+      setTimeout(runJackStage, 500);
+    }
+  }, 1000);
 }
 
-function stopJackTimer(){ clearInterval(jackTimer); jackTimer=null; jackStatus.textContent="Stopped"; setTimeout(()=>{ jackStatus.textContent="Ready"; jackTime.textContent="0"; jackIndex=0; },1000); }
+function stopJackTimer(){
+  clearInterval(jackTimer);
+  jackTimer = null;
+  jackStatus.textContent = "Stopped";
+  setTimeout(()=>{
+    jackStatus.textContent = "Ready";
+    jackTime.textContent = "0";
+    jackIndex = 0;
+  }, 1000);
+}
 
-// -------- SURPRISE IMAGE + SOUND --------
+/* -------------------------
+   Surprise image animation + reverb'd fart sound
+   ------------------------- */
 function showSurprise(){
-  const img=document.getElementById("surpriseImage");
-  img.style.transform="translate(-50%,-50%) scale(0.01)";
-  img.style.opacity="1";
-  setTimeout(()=>{ img.style.transform="translate(-50%,-50%) scale(1)"; },50);
-  setTimeout(()=>{ img.style.opacity="0"; document.getElementById("fartSound").play(); },3050);
+  const img = document.getElementById('surpriseImage');
+  // reset transforms so animation runs clean
+  img.style.transition = 'none';
+  img.style.transform = 'translate(-50%,-50%) scale(0.01)';
+  img.style.opacity = '1';
+  // force a reflow to ensure transition kicks in
+  void img.offsetWidth;
+  img.style.transition = 'transform 3s ease-out, opacity 2s ease-in 3s';
+  setTimeout(()=> img.style.transform = 'translate(-50%,-50%) scale(1)', 50);
+
+  // play fart sound with simple convolver reverb after the image hits full size
+  setTimeout(()=> {
+    // create audio nodes and play
+    try {
+      ensureAudio();
+      const audioEl = document.getElementById('fartSound');
+      // create source from audio element
+      const source = audioCtx.createMediaElementSource(audioEl);
+      // route: source -> convolver -> masterGain
+      source.connect(convolver);
+      // also connect dry signal to master so it remains audible
+      source.connect(masterGain);
+      // play (must be allowed by user gesture; pressing Start earlier usually counts)
+      audioEl.currentTime = 0;
+      audioEl.play().catch(()=>{/* play may be blocked if user hasn't interacted */});
+    } catch (e) {
+      // fallback: just play audio element normally
+      const ae = document.getElementById('fartSound');
+      try{ ae.play().catch(()=>{}); }catch(_) {}
+    }
+    // fade out image a bit after ~3s (animation orchestrated in CSS)
+    setTimeout(()=> { img.style.opacity = '0'; }, 3050);
+  }, 3050);
 }
 
-// -------- IMAGE PREVIEW --------
+/* -------------------------
+   Image preview handlers
+   ------------------------- */
 ['egg','custom'].forEach(id=>{
-  document.getElementById(id+'ImageInput').addEventListener('change', e=>{ const file=e.target.files[0]; if(file){ const img=document.getElementById(id+'ImageDisplay'); img.src=URL.createObjectURL(file); img.style.display='block'; }});
+  const el = document.getElementById(id+'ImageInput');
+  if (el) el.addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if (file) {
+      const img = document.getElementById(id+'ImageDisplay');
+      img.src = URL.createObjectURL(file);
+      img.style.display = 'block';
+    }
+  });
 });
 
-// -------- FIREBASE CHAT (with local commands) --------
-const firebaseConfig={apiKey:"AIzaSyD1RVLbn9DxiqM0TPb1jWcBgz8VfthPJAs",authDomain:"the-hazy-chat.firebaseapp.com",databaseURL:"https://the-hazy-chat-default-rtdb.firebaseio.com",projectId:"the-hazy-chat",storageBucket:"the-hazy-chat.firebasestorage.app",messagingSenderId:"884694664130",appId:"1:884694664130:web:4a2b8ae8fd69766da90c5b"};
+/* -------------------------
+   FIREBASE CHAT (secured rendering + local commands)
+   ------------------------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyD1RVLbn9DxiqM0TPb1jWcBgz8VfthPJAs",
+  authDomain: "the-hazy-chat.firebaseapp.com",
+  databaseURL: "https://the-hazy-chat-default-rtdb.firebaseio.com",
+  projectId: "the-hazy-chat",
+  storageBucket: "the-hazy-chat.firebasestorage.app",
+  messagingSenderId: "884694664130",
+  appId: "1:884694664130:web:4a2b8ae8fd69766da90c5b"
+};
 firebase.initializeApp(firebaseConfig);
-const db=firebase.database().ref('messages');
+const db = firebase.database().ref('messages');
 
-const userNameObj = { name: prompt("Enter your nickname:") || "Anon" };
+// store name inside object so closures update it
+const userNameObj = { name: (localStorage.getItem('hazy_name') || (prompt("Enter your nickname:") || "Anon")) };
+localStorage.setItem('hazy_name', userNameObj.name);
+
+// send on Enter key
+const chatInput = document.getElementById('chatInput');
+chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
 
 function sendMessage(){
-  const msgInput=document.getElementById('chatInput'); 
-  let text=msgInput.value.trim(); 
+  const msgInput = document.getElementById('chatInput');
+  let text = msgInput.value.trim();
   if(!text) return;
 
-  // ---- LOCAL COMMANDS ----
-  if(text === '/clear'){
+  // local commands processed client-side
+  if (text === '/clear'){
     document.getElementById('chatMessages').innerHTML = '';
-    msgInput.value='';
+    msgInput.value = '';
     return;
   }
-
-  if(text.startsWith('/nick ')){
+  if (text.startsWith('/nick ')){
     const newName = text.substring(6).trim();
-    if(newName) userNameObj.name = newName;
-    msgInput.value='';
+    if (newName) {
+      userNameObj.name = newName;
+      localStorage.setItem('hazy_name', newName);
+    }
+    msgInput.value = '';
     return;
   }
+  // other client-side command example: /me action
+  if (text.startsWith('/me ')){
+    const action = text.substring(4).trim();
+    if (action) {
+      db.push({text:`* ${action}`,time:Date.now(),user:userNameObj.name});
+      msgInput.value = '';
+      return;
+    }
+  }
 
-  // ---- NORMAL MESSAGE ----
-  db.push({text:text,time:Date.now(),user:userNameObj.name}); 
-  msgInput.value='';
+  db.push({text:text, time:Date.now(), user:userNameObj.name});
+  msgInput.value = '';
 }
 
-db.on('child_added',snap=>{
-  const val=snap.val(); 
-  const div=document.createElement('div'); 
-  div.className='chatMsg'; 
+// render incoming messages safely (no innerHTML with user text)
+db.on('child_added', snap => {
+  const val = snap.val();
+  if (!val) return;
+  const div = document.createElement('div');
+  div.className = 'chatMsg';
 
-  const avatar=document.createElement('div');
-  avatar.className='chatAvatar';
-  avatar.textContent=val.user.charAt(0).toUpperCase();
+  const avatar = document.createElement('div');
+  avatar.className = 'chatAvatar';
+  const avatarChar = (val.user && String(val.user).charAt(0).toUpperCase()) || '?';
+  avatar.textContent = avatarChar;
 
-  const content=document.createElement('div');
-  content.className='chatContent';
-  content.innerHTML = `<strong>${val.user}:</strong> ${val.text}`;
+  const content = document.createElement('div');
+  content.className = 'chatContent';
+  // safe rendering: create strong for username, and set message as textContent
+  const userStrong = document.createElement('strong');
+  userStrong.textContent = (val.user || 'Anon') + ': ';
+  content.appendChild(userStrong);
+  const txt = document.createTextNode((val.text || ''));
+  content.appendChild(txt);
 
-  const timestamp=document.createElement('div');
-  timestamp.className='chatTimestamp';
-  timestamp.textContent=new Date(val.time).toLocaleTimeString();
+  const timestamp = document.createElement('div');
+  timestamp.className = 'chatTimestamp';
+  timestamp.textContent = (val.time ? new Date(val.time).toLocaleTimeString() : '');
 
   div.appendChild(avatar);
   div.appendChild(content);
   div.appendChild(timestamp);
 
-  const chatBox=document.getElementById('chatMessages'); 
-  chatBox.appendChild(div); 
-  chatBox.scrollTop=chatBox.scrollHeight;
+  const chatBox = document.getElementById('chatMessages');
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// -------- MATRIX EFFECT --------
+/* -------------------------
+   MATRIX EFFECT (improvements)
+   - starts when egg timer starts or when egg tab opened
+   ------------------------- */
 function startMatrix(){
-  const canvas=document.getElementById('matrixCanvas'), ctx=canvas.getContext('2d');
-  canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight;
-  const cols=Math.floor(canvas.width/20)+1; const drops=new Array(cols).fill(1);
-  if(matrixInterval) clearInterval(matrixInterval);
-  matrixInterval=setInterval(()=>{
-    ctx.fillStyle='rgba(0,0,0,0.05)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle='#0F0'; ctx.font='20px monospace';
-    for(let i=0;i<drops.length;i++){
-      const text=String.fromCharCode(33+Math.random()*94); ctx.fillText(text,i*20,drops[i]*20);
-      if(drops[i]*20>canvas.height&&Math.random()>0.975)drops[i]=0; drops[i]++;
+  const canvas = document.getElementById('matrixCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  function resize() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  const cols = Math.floor(canvas.width / 20) + 1;
+  const drops = new Array(cols).fill(1);
+
+  if (matrixInterval) clearInterval(matrixInterval);
+  matrixInterval = setInterval(()=> {
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#0F0';
+    ctx.font = '20px monospace';
+    for (let i=0;i<drops.length;i++){
+      const text = String.fromCharCode(33 + Math.random() * 94);
+      ctx.fillText(text, i*20, drops[i]*20);
+      if (drops[i]*20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
     }
-  },50);
+  }, 50);
 }
-function stopMatrix(){ clearInterval(matrixInterval); matrixInterval=null; }
+function stopMatrix(){
+  if (matrixInterval) clearInterval(matrixInterval);
+  matrixInterval = null;
+}
+
+/* Apply initial UI state */
+selectTab('mainPage', null);
+updateVisitorCounterStyle();
 </script>
 </body>
 </html>
-
